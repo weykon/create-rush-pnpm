@@ -1,0 +1,1 @@
+a mono repo build tool using rush and pnpm, and start-up with tsup

@@ -1,0 +1,203 @@
+// 一个npm bin接受一个目录参数来创建一个目录
+const fs = require('fs');
+const path = require('path');
+const exec = require('child_process').exec;
+// 获取命令行参数
+const dirName = process.argv[2] || __dirname;
+
+async function main() {
+    await checkDirExistence(path.join(__dirname, dirName))
+
+    // 创建目录
+    await mkdirPromise(path.join(__dirname, dirName))
+        .then(() => {
+            console.log(`${dirName} 目录创建成功`);
+        })
+
+    await checkAndGlobalInstall('pnpm', 'pnpm 安装成功');
+    await checkAndGlobalInstall('rush', 'rush 安装成功');
+
+    // 使用 exec 函数执行命令 "cd dirName"
+    await terminalCDdirName();
+
+    // 使用 exec 函数执行命令 "promise exec pnpm init"
+    await pnpmInit();
+
+    // 使用 exec 函数执行命令 "pnpm install"
+    await executeInstall();
+    // 使用 exec 函数执行命令 "a promise exec pnpm install i-like-tsup"
+    await installIlikeTSUP();
+    await tsupInitPromise();
+}
+
+
+
+// 检查目录是否存在
+const checkDirExistence = async (dirPath) => {
+    return new Promise(async (resolve, reject) => {
+        if (fs.existsSync(dirPath)) {
+            console.log(`${dirPath} 目录已存在`);
+            // 询问用户是否删除目录
+            const readline = require('readline').createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            readline.question('是否删除目录？(y/n)', async (answer) => {
+                if (answer === 'y') {
+                    await fs.promises.rmdir(dirPath, { recursive: true });
+                    console.log(`${dirPath} 目录已删除`);
+                    resolve();
+                } else {
+                    console.log(`${dirPath} 目录未删除`);
+                    reject()
+                }
+                readline.close();
+            });
+        } else {
+            console.log(`${dirPath} 目录不存在，开始创建...`);
+            resolve();
+        }
+    })
+};
+
+
+
+const mkdirPromise = (dirPath) => {
+    return new Promise((resolve, reject) => {
+        fs.mkdir(dirPath, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+
+main()
+
+// 使用 exec 函数执行命令 "tsup init"
+const tsupInitPromise = () => {
+    return new Promise((resolve, reject) => {
+        exec(`tsup-init`, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(stdout);
+                console.log('tsup init 成功');
+                resolve();
+            }
+        });
+    });
+};
+
+
+
+// 重命名文件为 package.json
+const renameFilePromise = (oldPath, newPath) => {
+    return new Promise((resolve, reject) => {
+        fs.rename(oldPath, newPath, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+
+// 复制文件 pp.json 到目录中
+const copyFilePromise = (src, dest) => {
+    return new Promise((resolve, reject) => {
+        fs.copyFile(src, dest, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+async function installIlikeTSUP() {
+    await new Promise((resolve, reject) => {
+        exec(`pnpm install i-like-tsup -D`, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(stdout);
+                console.log('i-like-tsup 安装成功');
+                resolve();
+            }
+        });
+    });
+}
+
+async function pnpmInit() {
+    await new Promise((resolve, reject) => {
+        exec(`pnpm init`, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(stdout);
+                console.log('pnpm init 成功');
+                resolve();
+            }
+        });
+    });
+}
+
+async function terminalCDdirName() {
+    await new Promise((resolve, reject) => {
+        process.chdir(path.join(__dirname, dirName));
+        console.log(`当前终端执行命令的根目录已改为 ${dirName}`);
+        resolve();
+    });
+}
+
+async function executeInstall() {
+    try {
+        await new Promise((resolve, reject) => {
+            exec(`pnpm install`, (err, stdout, stderr) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(stdout);
+                    console.log('pnpm install成功');
+                    resolve();
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+function checkAndGlobalInstall(packageName, successMessage) {
+    return new Promise((resolve, reject) => {
+        exec(`npm list -g --depth 0 ${packageName}`, (err, stdout, stderr) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            }
+            console.log(stdout);
+            if (!stdout.includes(packageName) && stdout.includes('empty')) {
+                exec(`npm install -g ${packageName}`, (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    console.log(successMessage);
+                    resolve();
+                });
+            } else {
+                console.log(`系统已安装 ${packageName}`);
+                resolve();
+            }
+        });
+    });
+}
+
