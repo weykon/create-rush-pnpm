@@ -1,15 +1,17 @@
 {
-  "name": "rush-pnpm",
-  "version": "0.0.1",
+  "name": "create-rush-pnpm",
+  "version": "0.0.7",
   "description": "a mono repo build tool using rush and pnpm, and start-up with tsup",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "main": "./bin/create-rush-pnpm",
   "author": "weykon <635883092@qq.com>",
   "license": "ISC",
   "devDependencies": {},
-  "bin": "./bin/rush-pnpm.js",
+  "bin": {
+    "create-rush-pnpm": "./bin/create-rush-pnpm"
+  },
   "keywords": [
     "tsup",
     "ts-node",
@@ -19,6 +21,6 @@
     "pnpm"
   ],
   "repository": {
-    "url": "https://github.com/weykon/rush-pnpm.git"
+    "url": "https://github.com/weykon/create-rush-pnpm.git"
   }
 }

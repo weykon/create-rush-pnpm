@@ -1,15 +1,18 @@
+#!/usr/bin/env node
+
 // 一个npm bin接受一个目录参数来创建一个目录
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').exec;
+const project_path = process.cwd();
 // 获取命令行参数
-const dirName = process.argv[2] || __dirname;
+const dirName = process.argv[2] || '';
 
 async function main() {
-    await checkDirExistence(path.join(__dirname, dirName))
+    await checkDirExistence(path.join(project_path, dirName))
 
     // 创建目录
-    await mkdirPromise(path.join(__dirname, dirName))
+    await mkdirPromise(path.join(project_path, dirName))
         .then(() => {
             console.log(`${dirName} 目录创建成功`);
         })
@@ -151,7 +154,7 @@ async function pnpmInit() {
 
 async function terminalCDdirName() {
     await new Promise((resolve, reject) => {
-        process.chdir(path.join(__dirname, dirName));
+        process.chdir(path.join(project_path, dirName));
         console.log(`当前终端执行命令的根目录已改为 ${dirName}`);
         resolve();
     });
